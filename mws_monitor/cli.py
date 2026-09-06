@@ -14,6 +14,8 @@ from .models import Alert, MwsProduct, Player, ReviewQueue
 from .event_pricing import run_event_pricing
 from .romanian_auctions import run_romanian_auctions
 from .service import MonitorService, export_results, sync_aliases
+from .transfermarkt_romanian_players import update_romanian_player_csv
+from .transfermarkt_top_players import update_top_players_csv
 
 
 def cmd_init_db(_args: argparse.Namespace) -> None:
@@ -125,6 +127,31 @@ def cmd_romanian_auctions(args: argparse.Namespace) -> None:
     print(f"Matched {len(matches)} live bidding shirts. Wrote latest.csv, latest.json, and latest.md to {args.output_dir}.")
 
 
+def cmd_u23_auctions(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    matches = run_romanian_auctions(args.players, args.output_dir, settings)
+    print(f"Matched {len(matches)} live bidding shirts. Wrote latest.csv, latest.json, and latest.md to {args.output_dir}.")
+
+
+def cmd_update_romanian_players(args: argparse.Namespace) -> None:
+    count = update_romanian_player_csv(
+        source_csv_path=args.source,
+        output_csv_path=args.output,
+        request_delay_seconds=args.delay,
+    )
+    print(f"Wrote {count} Romanian players to {args.output}.")
+
+
+def cmd_update_u23_players(args: argparse.Namespace) -> None:
+    count = update_top_players_csv(
+        source_url=args.source_url,
+        output_csv_path=args.output,
+        limit=args.limit,
+        request_delay_seconds=args.delay,
+    )
+    print(f"Wrote {count} U23 players to {args.output}.")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="mws-monitor")
     sub = parser.add_subparsers(required=True)
@@ -183,6 +210,32 @@ def build_parser() -> argparse.ArgumentParser:
     romanian.add_argument("--players", default="data/romanian_players.csv", help="CSV/XLSX player list")
     romanian.add_argument("--output-dir", default="outputs", help="Directory for latest.csv/latest.json/latest.md")
     romanian.set_defaults(func=cmd_romanian_auctions)
+
+    u23 = sub.add_parser("u23-auctions", help="Compare the Top 200 U23 list with current MWS live bidding shirts")
+    u23.add_argument("--players", default="data/top_200_u23_players.csv", help="CSV/XLSX player list")
+    u23.add_argument("--output-dir", default="outputs/u23", help="Directory for latest.csv/latest.json/latest.md")
+    u23.set_defaults(func=cmd_u23_auctions)
+
+    update_ro = sub.add_parser("update-romanian-players", help="Refresh data/romanian_players.csv from Transfermarkt source pages")
+    update_ro.add_argument("--source", default="data/romanian_players.csv", help="Existing CSV used to discover Transfermarkt source pages")
+    update_ro.add_argument("--output", default="data/romanian_players.csv", help="CSV file to write")
+    update_ro.add_argument("--delay", type=float, default=1.0, help="Delay between Transfermarkt page requests")
+    update_ro.set_defaults(func=cmd_update_romanian_players)
+
+    update_u23 = sub.add_parser("update-u23-players", help="Refresh data/top_200_u23_players.csv from Transfermarkt")
+    update_u23.add_argument(
+        "--source-url",
+        default=(
+            "https://www.transfermarkt.com/spieler-statistik/wertvollstespieler/marktwertetop/plus/0/galerie/0"
+            "?ausrichtung=alle&spielerposition_id=alle&altersklasse=u23&jahrgang=0&land_id=0&kontinent_id=0"
+            "&jahr=2025&yt0=show&page=1"
+        ),
+        help="Transfermarkt top players URL",
+    )
+    update_u23.add_argument("--output", default="data/top_200_u23_players.csv", help="CSV file to write")
+    update_u23.add_argument("--limit", type=int, default=200, help="Number of players to keep")
+    update_u23.add_argument("--delay", type=float, default=1.0, help="Delay between Transfermarkt page requests")
+    update_u23.set_defaults(func=cmd_update_u23_players)
 
     return parser
 

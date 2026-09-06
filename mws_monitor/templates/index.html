@@ -15,6 +15,7 @@
     <div class="header-actions">
       <a class="button secondary" href="/export">Export CSV</a>
       <a class="button secondary" href="/?view=romanian_auctions">Romanian Auctions</a>
+      <a class="button secondary" href="/?view=u23_auctions">Top 200 U23</a>
       <form action="/crawl" method="post">
         <button type="submit">Crawl now</button>
       </form>
@@ -38,6 +39,7 @@
       <a class="button {{ 'active' if view == 'watchlist' else '' }}" href="/?view=watchlist">Watchlist</a>
       <a class="button {{ 'active' if view == 'aliases' else '' }}" href="/?view=aliases">Aliases</a>
       <a class="button {{ 'active' if view == 'romanian_auctions' else '' }}" href="/?view=romanian_auctions">Romanian Auctions</a>
+      <a class="button {{ 'active' if view == 'u23_auctions' else '' }}" href="/?view=u23_auctions">Top 200 U23</a>
       <a class="button secondary" href="/export">Export CSV</a>
     </nav>
 
@@ -165,6 +167,64 @@
     </section>
     {% endif %}
 
+    {% if view == "u23_auctions" %}
+    <section>
+      <div class="section-header">
+        <div>
+          <h2>Top 200 U23 Auctions</h2>
+          <p class="hint">
+            {{ u23_report.match_count }} live auction{{ '' if u23_report.match_count == 1 else 's' }}
+            {% if u23_report.checked_at %}checked at {{ u23_report.checked_at }}{% endif %}
+          </p>
+        </div>
+        <form action="/u23-auctions/recheck" method="post" id="u23-recheck-form">
+          <button type="submit" id="u23-recheck-button">Recheck Top 200 U23</button>
+        </form>
+      </div>
+      <div class="progress-panel" id="u23-recheck-progress" hidden>
+        <div class="progress-track">
+          <div class="progress-fill" id="u23-recheck-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="u23-recheck-message">Queued</span>
+          <strong id="u23-recheck-percent">0%</strong>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Item</th>
+            <th>Event</th>
+            <th>Bid</th>
+            <th>Ends</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for auction in u23_report.matches %}
+          <tr>
+            <td>
+              <strong>{{ auction.player_name }}</strong>
+              <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
+            </td>
+            <td>{{ auction.labels or "Auction" }}</td>
+            <td>{{ auction.event_name or "-" }}</td>
+            <td>
+              {% if auction.current_bid_eur %}€{{ "{:,}".format(auction.current_bid_eur) }}{% else %}-{% endif %}
+              {% if auction.current_bid_usd %}<span class="muted">${{ "{:,}".format(auction.current_bid_usd) }}</span>{% endif %}
+            </td>
+            <td>{{ auction.end_date_utc or "-" }}</td>
+            <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6">No Top 200 U23 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
     {% if view == "watchlist" %}
     <section>
       <h2>Player Watchlist</h2>
@@ -268,13 +328,14 @@
     </section>
   </main>
   <script>
-    const romanianForm = document.getElementById("romanian-recheck-form");
-    if (romanianForm) {
-      const button = document.getElementById("romanian-recheck-button");
-      const panel = document.getElementById("romanian-recheck-progress");
-      const fill = document.getElementById("romanian-recheck-fill");
-      const percent = document.getElementById("romanian-recheck-percent");
-      const message = document.getElementById("romanian-recheck-message");
+    const wireRecheck = (config) => {
+      const form = document.getElementById(config.formId);
+      if (!form) return;
+      const button = document.getElementById(config.buttonId);
+      const panel = document.getElementById(config.panelId);
+      const fill = document.getElementById(config.fillId);
+      const percent = document.getElementById(config.percentId);
+      const message = document.getElementById(config.messageId);
 
       const renderProgress = (job) => {
         const value = Math.max(0, Math.min(100, Number(job.percent) || 0));
@@ -283,14 +344,14 @@
         message.textContent = job.error || job.message || "Running";
       };
 
-      romanianForm.addEventListener("submit", async (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
         button.disabled = true;
         panel.hidden = false;
         renderProgress({ percent: 0, message: "Queued" });
 
         try {
-          const start = await fetch(romanianForm.action, { method: "POST" });
+          const start = await fetch(form.action, { method: "POST" });
           if (!start.ok) throw new Error("Could not start recheck");
           const job = await start.json();
 
@@ -300,7 +361,7 @@
             const status = await statusResponse.json();
             renderProgress(status);
             if (status.status === "complete") {
-              window.location.href = "/?view=romanian_auctions";
+              window.location.href = config.redirect;
               return;
             }
             if (status.status === "failed") {
@@ -315,7 +376,26 @@
           button.disabled = false;
         }
       });
-    }
+    };
+
+    wireRecheck({
+      formId: "romanian-recheck-form",
+      buttonId: "romanian-recheck-button",
+      panelId: "romanian-recheck-progress",
+      fillId: "romanian-recheck-fill",
+      percentId: "romanian-recheck-percent",
+      messageId: "romanian-recheck-message",
+      redirect: "/?view=romanian_auctions",
+    });
+    wireRecheck({
+      formId: "u23-recheck-form",
+      buttonId: "u23-recheck-button",
+      panelId: "u23-recheck-progress",
+      fillId: "u23-recheck-fill",
+      percentId: "u23-recheck-percent",
+      messageId: "u23-recheck-message",
+      redirect: "/?view=u23_auctions",
+    });
   </script>
 </body>
 </html>

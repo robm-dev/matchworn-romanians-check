@@ -28,8 +28,13 @@ app.mount("/static", StaticFiles(directory=str(ROOT / "mws_monitor" / "static"))
 ROMANIAN_PLAYERS_PATH = ROOT / "data" / "romanian_players.csv"
 ROMANIAN_OUTPUT_DIR = ROOT / "outputs"
 ROMANIAN_OUTPUT_PATH = ROMANIAN_OUTPUT_DIR / "latest.json"
+U23_PLAYERS_PATH = ROOT / "data" / "top_200_u23_players.csv"
+U23_OUTPUT_DIR = ROOT / "outputs" / "u23"
+U23_OUTPUT_PATH = U23_OUTPUT_DIR / "latest.json"
 _romanian_recheck_jobs: dict[str, dict] = {}
 _romanian_recheck_lock = Lock()
+_u23_recheck_jobs: dict[str, dict] = {}
+_u23_recheck_lock = Lock()
 
 
 def get_session():
@@ -48,11 +53,11 @@ def aware_dt(value: datetime | None) -> datetime | None:
     return value
 
 
-def load_romanian_auction_report() -> dict:
-    if not ROMANIAN_OUTPUT_PATH.exists():
+def _load_auction_report(path: Path) -> dict:
+    if not path.exists():
         return {"checked_at": None, "match_count": 0, "matches": []}
     try:
-        with ROMANIAN_OUTPUT_PATH.open("r", encoding="utf-8") as handle:
+        with path.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
     except (json.JSONDecodeError, OSError):
         return {"checked_at": None, "match_count": 0, "matches": []}
@@ -61,6 +66,14 @@ def load_romanian_auction_report() -> dict:
         "match_count": data.get("match_count") or len(data.get("matches") or []),
         "matches": data.get("matches") or [],
     }
+
+
+def load_romanian_auction_report() -> dict:
+    return _load_auction_report(ROMANIAN_OUTPUT_PATH)
+
+
+def load_u23_auction_report() -> dict:
+    return _load_auction_report(U23_OUTPUT_PATH)
 
 
 def _set_romanian_job(job_id: str, *, percent: int, status: str, message: str, error: str | None = None) -> None:
@@ -79,6 +92,24 @@ def _run_romanian_recheck_job(job_id: str) -> None:
         _set_romanian_job(job_id, percent=100, status="complete", message="Recheck complete")
     except Exception as exc:
         _set_romanian_job(job_id, percent=100, status="failed", message="Recheck failed", error=str(exc))
+
+
+def _set_u23_job(job_id: str, *, percent: int, status: str, message: str, error: str | None = None) -> None:
+    with _u23_recheck_lock:
+        job = _u23_recheck_jobs.setdefault(job_id, {})
+        job.update({"percent": percent, "status": status, "message": message, "error": error})
+
+
+def _run_u23_recheck_job(job_id: str) -> None:
+    try:
+        _set_u23_job(job_id, percent=15, status="running", message="Loading Top 200 U23 player list")
+        settings = load_settings()
+        _set_u23_job(job_id, percent=35, status="running", message="Fetching live MatchWornShirt auctions")
+        run_romanian_auctions(U23_PLAYERS_PATH, U23_OUTPUT_DIR, settings)
+        _set_u23_job(job_id, percent=90, status="running", message="Writing latest results")
+        _set_u23_job(job_id, percent=100, status="complete", message="Recheck complete")
+    except Exception as exc:
+        _set_u23_job(job_id, percent=100, status="failed", message="Recheck failed", error=str(exc))
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -115,6 +146,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
     players = session.scalars(select(Player).order_by(Player.market_value_eur.desc()).limit(200)).all()
     aliases = session.scalars(select(PlayerAlias).order_by(PlayerAlias.input_name.asc())).all()
     romanian_report = load_romanian_auction_report()
+    u23_report = load_u23_auction_report()
     alias_player = request.query_params.get("alias_player", "")
     alias_athlete = request.query_params.get("alias_athlete", "")
     alias_category = request.query_params.get("alias_category", "")
@@ -137,6 +169,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
             "players": players,
             "aliases": aliases,
             "romanian_report": romanian_report,
+            "u23_report": u23_report,
             "alias_player": alias_player,
             "alias_athlete": alias_athlete,
             "alias_category": alias_category,
@@ -180,6 +213,23 @@ def recheck_romanian_auctions():
 def romanian_auction_recheck_status(job_id: str):
     with _romanian_recheck_lock:
         job = _romanian_recheck_jobs.get(job_id)
+    if not job:
+        return JSONResponse({"status": "missing", "percent": 100, "message": "Job not found"}, status_code=404)
+    return job
+
+
+@app.post("/u23-auctions/recheck")
+def recheck_u23_auctions():
+    job_id = uuid4().hex
+    _set_u23_job(job_id, percent=0, status="queued", message="Queued")
+    Thread(target=lambda: _run_u23_recheck_job(job_id), daemon=True).start()
+    return JSONResponse({"job_id": job_id, "status_url": f"/u23-auctions/recheck/status/{job_id}"})
+
+
+@app.get("/u23-auctions/recheck/status/{job_id}")
+def u23_auction_recheck_status(job_id: str):
+    with _u23_recheck_lock:
+        job = _u23_recheck_jobs.get(job_id)
     if not job:
         return JSONResponse({"status": "missing", "percent": 100, "message": "Job not found"}, status_code=404)
     return job

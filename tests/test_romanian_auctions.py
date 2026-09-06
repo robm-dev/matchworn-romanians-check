@@ -34,6 +34,25 @@ def test_load_romanian_players_detects_transfermarkt_header(tmp_path: Path):
     assert players[0].market_value_eur == 16000000
 
 
+def test_load_romanian_players_accepts_generic_u23_csv_headers(tmp_path: Path):
+    csv_path = tmp_path / "u23.csv"
+    csv_path.write_text(
+        "\n".join(
+            [
+                "name,team,position,market_value_eur,age,source_url",
+                "Lamine Yamal,FC Barcelona,Right Winger,200000000,17,https://www.transfermarkt.com/lamine-yamal/profil/spieler/937958",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    players = load_romanian_players(csv_path)
+
+    assert players[0].name == "Lamine Yamal"
+    assert players[0].team == "FC Barcelona"
+    assert players[0].market_value_eur == 200000000
+
+
 def test_match_players_to_products_uses_normalized_names_and_live_bidding_shirts():
     players = [
         _player("Radu Drăgușin", "ACF Fiorentina", 16000000),

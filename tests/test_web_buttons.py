@@ -16,6 +16,7 @@ def test_dashboard_button_routes_render():
         "/?view=watchlist",
         "/?view=aliases",
         "/?view=romanian_auctions",
+        "/?view=u23_auctions",
         "/export",
         "/crawl",
     ]:
@@ -122,3 +123,73 @@ def test_romanian_auction_recheck_runs_checker_and_reports_progress(tmp_path, mo
     assert status["status"] == "complete"
     assert status["percent"] == 100
     assert calls and calls[0][0] == tmp_path / "players.csv"
+
+
+def test_u23_auction_view_lists_live_auction_links(tmp_path, monkeypatch):
+    latest = tmp_path / "latest.json"
+    latest.write_text(
+        """
+{
+  "checked_at": "2026-09-06T11:20:47+00:00",
+  "match_count": 1,
+  "matches": [
+    {
+      "checked_at": "2026-09-06T11:20:47+00:00",
+      "player_name": "Lamine Yamal",
+      "transfermarkt_team": "FC Barcelona",
+      "position": "Right Winger",
+      "market_value_eur": 200000000,
+      "mws_name": "Lamine Yamal",
+      "event_name": "FC Barcelona - Real Madrid",
+      "labels": "Worn, Signed",
+      "current_bid_eur": 1200,
+      "current_bid_usd": 1400,
+      "end_date_utc": "2026-09-14T16:00:00Z",
+      "slug": "lamine-live",
+      "url": "https://mws.com/us/product/lamine-live"
+    }
+  ]
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("mws_monitor.web.U23_OUTPUT_PATH", latest)
+
+    response = TestClient(app).get("/?view=u23_auctions")
+
+    assert response.status_code == 200
+    assert "Top 200 U23 Auctions" in response.text
+    assert "Recheck Top 200 U23" in response.text
+    assert "Lamine Yamal" in response.text
+    assert "https://mws.com/us/product/lamine-live" in response.text
+
+
+def test_u23_auction_recheck_runs_checker_and_reports_progress(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_run(player_list_path, output_dir, settings):
+        calls.append((player_list_path, output_dir, settings.mws_web_base_url))
+        return []
+
+    class ImmediateThread:
+        def __init__(self, target, daemon):
+            self.target = target
+            self.daemon = daemon
+
+        def start(self):
+            self.target()
+
+    monkeypatch.setattr("mws_monitor.web.U23_PLAYERS_PATH", tmp_path / "u23.csv")
+    monkeypatch.setattr("mws_monitor.web.U23_OUTPUT_DIR", tmp_path / "u23_outputs")
+    monkeypatch.setattr("mws_monitor.web.run_romanian_auctions", fake_run)
+    monkeypatch.setattr("mws_monitor.web.Thread", ImmediateThread)
+
+    client = TestClient(app)
+    response = client.post("/u23-auctions/recheck")
+
+    assert response.status_code == 200
+    job_id = response.json()["job_id"]
+    status = client.get(f"/u23-auctions/recheck/status/{job_id}").json()
+    assert status["status"] == "complete"
+    assert status["percent"] == 100
+    assert calls and calls[0][0] == tmp_path / "u23.csv"
