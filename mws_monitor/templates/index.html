@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MWS Value Monitor</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">MatchWornShirt tracker</p>
+      <h1>MWS Value Monitor</h1>
+    </div>
+    <div class="header-actions">
+      <a class="button secondary" href="/export">Export CSV</a>
+      <form action="/crawl" method="post">
+        <button type="submit">Crawl now</button>
+      </form>
+    </div>
+  </header>
+
+  <main>
+    <section class="stats">
+      <a class="stat-button" href="/?view=watchlist"><strong>{{ counts.players }}</strong><span>Players</span></a>
+      <a class="stat-button" href="/?view=new"><strong>{{ counts.products }}</strong><span>Shirts</span></a>
+      <a class="stat-button" href="/?view=live"><strong>{{ counts.live }}</strong><span>Live</span></a>
+      <a class="stat-button" href="/?view=review"><strong>{{ counts.review }}</strong><span>Needs Review</span></a>
+    </section>
+
+    <nav class="quick-actions" aria-label="Dashboard filters">
+      <a class="button {{ 'active' if view == 'live_bargains' else '' }}" href="/?view=live_bargains&min_score={{ min_score }}">Live Bargains</a>
+      <a class="button {{ 'active' if view == 'closing' else '' }}" href="/?view=closing&min_score={{ min_score }}">Closing Soon</a>
+      <a class="button {{ 'active' if view == 'new' else '' }}" href="/?view=new&min_score={{ min_score }}">Newly Found</a>
+      <a class="button {{ 'active' if view == 'finished' else '' }}" href="/?view=finished&min_score={{ min_score }}">Finished Cheap</a>
+      <a class="button {{ 'active' if view == 'review' else '' }}" href="/?view=review">Needs Review</a>
+      <a class="button {{ 'active' if view == 'watchlist' else '' }}" href="/?view=watchlist">Watchlist</a>
+      <a class="button {{ 'active' if view == 'aliases' else '' }}" href="/?view=aliases">Aliases</a>
+      <a class="button secondary" href="/export">Export CSV</a>
+    </nav>
+
+    <section class="upload">
+      <form action="/import-path" method="get">
+        <label>CSV path</label>
+        <input type="text" name="path" value="examples/u21_u23_sample.csv">
+        <input type="text" name="name" value="watchlist">
+        <button type="submit">Import</button>
+      </form>
+      <form method="get">
+        <input type="hidden" name="view" value="{{ view }}">
+        <label>Minimum score</label>
+        <input type="number" name="min_score" value="{{ min_score }}" min="0" max="100">
+        <button type="submit">Filter</button>
+      </form>
+    </section>
+
+    {% if view in ["live_bargains", "live", "closing", "new", "finished"] %}
+    <section>
+      <h2>
+        {% if view == "closing" %}Closing Soon
+        {% elif view == "new" %}Newly Found
+        {% elif view == "finished" %}Finished Cheap
+        {% elif view == "live" %}Live Auctions
+        {% else %}Live Bargains & Cheap Comps{% endif %}
+      </h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Score</th>
+            <th>Player</th>
+            <th>Market</th>
+            <th>MWS Team</th>
+            <th>Price</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Ends</th>
+            <th>Reason</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for player, product in products %}
+          <tr>
+            <td><strong>{{ product.bargain_score }}</strong></td>
+            <td>{{ player.input_name }}</td>
+            <td>€{{ "{:,.0f}".format(player.market_value_eur or 0) }}</td>
+            <td>{{ product.shirt_team or "-" }}</td>
+            <td>€{{ "{:,}".format(product.latest_price_eur or product.final_price_eur or 0) }}</td>
+            <td>{{ product.labels or "-" }}</td>
+            <td>{{ product.status }}</td>
+            <td>{{ product.end_date.date() if product.end_date else "-" }}</td>
+            <td>{{ product.bargain_reason }}</td>
+            <td class="row-actions">
+              <a class="button small" href="{{ product.url }}" target="_blank" rel="noreferrer">View on MWS</a>
+              <a class="button small secondary" href="/product/{{ product.id }}">Details</a>
+              <a class="button small secondary" href="/product/{{ product.id }}/alias">Add Alias</a>
+              <a class="button small danger" href="/product/{{ product.id }}/ignore">Ignore</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="10">No products yet. Import a CSV and crawl.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    {% if view == "watchlist" %}
+    <section>
+      <h2>Player Watchlist</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Team</th>
+            <th>Age</th>
+            <th>Position</th>
+            <th>Market Value</th>
+            <th>Lists</th>
+            <th>Best Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for player in players %}
+          <tr>
+            <td>{{ player.input_name }}</td>
+            <td>{{ player.team or "-" }}</td>
+            <td>{{ player.age or "-" }}</td>
+            <td>{{ player.position or "-" }}</td>
+            <td>€{{ "{:,.0f}".format(player.market_value_eur or 0) }}</td>
+            <td>{{ player.categories or "-" }}</td>
+            <td>{{ player.best_rank or "-" }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7">No players imported yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    {% if view == "aliases" %}
+    <section>
+      <h2>Manual Alias Manager</h2>
+      <form class="alias-form" action="/alias-save" method="get">
+        <label>Input name</label>
+        <input type="text" name="input_name" value="{{ alias_player }}" placeholder="Pedri">
+        <label>MWS athlete</label>
+        <input type="text" name="preferred_mws_athlete_name" value="{{ alias_athlete }}" placeholder="Pedri González">
+        <label>MWS category ID</label>
+        <input type="text" name="preferred_mws_category_id" value="{{ alias_category }}" placeholder="optional">
+        <label>Notes</label>
+        <input type="text" name="notes" placeholder="why this alias exists">
+        <button type="submit">Save Alias</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>Input Name</th>
+            <th>MWS Athlete</th>
+            <th>MWS Category ID</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alias in aliases %}
+          <tr>
+            <td>{{ alias.input_name }}</td>
+            <td>{{ alias.preferred_mws_athlete_name or "-" }}</td>
+            <td>{{ alias.preferred_mws_category_id or "-" }}</td>
+            <td>{{ alias.notes or "-" }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No aliases loaded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="hint">Edit <code>config/player_aliases.yaml</code>, then run <code>python -m mws_monitor init-db</code> to reload aliases.</p>
+    </section>
+    {% endif %}
+
+    <section class="split">
+      <div>
+        <h2>Needs Review</h2>
+        <ul>
+          {% for row in review %}
+          <li>
+            <strong>{{ row.input_name }}</strong>: {{ row.reason }}
+            <form class="inline-form" action="/review/{{ row.id }}/close" method="post">
+              <button class="small" type="submit">Mark Reviewed</button>
+            </form>
+          </li>
+          {% else %}
+          <li>No open review items.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2>Alerts</h2>
+        <ul>
+          {% for alert in alerts %}
+          <li>{{ alert.message }}</li>
+          {% else %}
+          <li>No alerts yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

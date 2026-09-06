@@ -1,0 +1,28 @@
+mws_base_url: "https://api.mws.com/catalog"
+mws_web_base_url: "https://mws.com/us/product"
+mws_platform_key: "43bc8ad4-6edf-4313-bd55-60f194de15c5"
+currency: "EUR"
+database_url: "sqlite:///data/mws_value_monitor.db"
+cache_dir: "data/cache"
+request_timeout_seconds: 15
+max_concurrency: 2
+request_delay_seconds: 0.25
+crawl_interval_minutes: 60
+finished_refresh_days: 30
+watched_categories:
+  - u21
+  - u23
+alert_thresholds:
+  high_value_market_value_eur: 50000000
+  high_value_price_eur: 500
+  elite_market_value_eur: 100000000
+  elite_price_eur: 1000
+  worn_signed_market_value_eur: 75000000
+  worn_signed_price_eur: 2000
+  closing_hours: 6
+  closing_score: 75
+notifications:
+  dashboard: true
+  discord_webhook_url: ""
+  telegram_bot_token: ""
+  telegram_chat_id: ""

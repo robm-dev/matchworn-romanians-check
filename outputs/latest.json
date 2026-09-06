@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-09-06T11:13:40.723331+00:00",
+  "match_count": 3,
+  "matches": [
+    {
+      "checked_at": "2026-09-06T11:13:40.723331+00:00",
+      "player_name": "Ioan Vermeșan",
+      "transfermarkt_team": "Hellas Verona",
+      "position": "Atacant central",
+      "market_value_eur": 1000000,
+      "mws_name": "Ioan Vermesan",
+      "event_name": "Calcio Padova - Hellas Verona FC",
+      "labels": "Issued, Signed",
+      "current_bid_eur": 68,
+      "current_bid_usd": 80,
+      "end_date_utc": "2026-09-07T16:00:00Z",
+      "slug": "ioan-vermesan-20kkpqv2nk6a80R5BMjSzg",
+      "url": "https://mws.com/us/product/ioan-vermesan-20kkpqv2nk6a80R5BMjSzg"
+    },
+    {
+      "checked_at": "2026-09-06T11:13:40.723331+00:00",
+      "player_name": "Radu Drăgușin",
+      "transfermarkt_team": "ACF Fiorentina",
+      "position": "Fundaș central",
+      "market_value_eur": 16000000,
+      "mws_name": "Radu Drăgușin",
+      "event_name": "ACF Fiorentina - Frosinone",
+      "labels": "Issued, Signed",
+      "current_bid_eur": 363,
+      "current_bid_usd": 422,
+      "end_date_utc": "2026-09-09T16:30:00Z",
+      "slug": "radu-drguin-2zfxoES_jkWDkU1Fy1O_xQ-51",
+      "url": "https://mws.com/us/product/radu-drguin-2zfxoES_jkWDkU1Fy1O_xQ-51"
+    },
+    {
+      "checked_at": "2026-09-06T11:13:40.723331+00:00",
+      "player_name": "Radu Drăgușin",
+      "transfermarkt_team": "ACF Fiorentina",
+      "position": "Fundaș central",
+      "market_value_eur": 16000000,
+      "mws_name": "Radu Drăgușin",
+      "event_name": "ACF Fiorentina - Torino FC",
+      "labels": "Worn, Signed",
+      "current_bid_eur": 121,
+      "current_bid_usd": 140,
+      "end_date_utc": "2026-09-14T16:00:00Z",
+      "slug": "radu-drguin-MBsfL62RVkGR5U9osKYxTQ",
+      "url": "https://mws.com/us/product/radu-drguin-MBsfL62RVkGR5U9osKYxTQ"
+    }
+  ]
+}

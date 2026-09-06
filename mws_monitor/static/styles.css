@@ -1,0 +1,283 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f6f7f2;
+  color: #151816;
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  align-items: end;
+  background: #13261f;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  padding: 32px;
+}
+
+.header-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+h1, h2, p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 34px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.eyebrow {
+  color: #b9dfc7;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+main {
+  padding: 24px 32px 48px;
+}
+
+button, .button {
+  background: #e0ff66;
+  border: 1px solid #93ad28;
+  border-radius: 6px;
+  color: #151816;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 10px 14px;
+  text-decoration: none;
+}
+
+.button.secondary {
+  background: #ffffff;
+  border-color: #b8bdae;
+}
+
+.button.danger {
+  background: #ffe8e2;
+  border-color: #c76656;
+}
+
+.button.active {
+  background: #13261f;
+  border-color: #13261f;
+  color: #ffffff;
+}
+
+.button.small, button.small {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 7px 9px;
+}
+
+input {
+  border: 1px solid #b8bdae;
+  border-radius: 6px;
+  padding: 9px 10px;
+}
+
+.stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  margin-bottom: 18px;
+}
+
+.stat-button {
+  background: #ffffff;
+  border: 1px solid #d7ddcf;
+  border-radius: 8px;
+  color: #151816;
+  display: block;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.stat-button:hover {
+  border-color: #93ad28;
+  box-shadow: 0 0 0 2px #e0ff66;
+}
+
+.stats strong {
+  display: block;
+  font-size: 28px;
+}
+
+.stats span {
+  color: #516158;
+}
+
+.upload {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-bottom: 26px;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.upload form {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.alias-form {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d7ddcf;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(140px, 1fr) auto minmax(180px, 1fr);
+  margin-bottom: 16px;
+  padding: 14px;
+}
+
+.alias-form button {
+  grid-column: span 2;
+  justify-content: center;
+}
+
+section {
+  margin-top: 24px;
+}
+
+table {
+  background: #ffffff;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+th, td {
+  border-bottom: 1px solid #e1e5dc;
+  font-size: 14px;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #e8eee2;
+  color: #2a342f;
+}
+
+a {
+  color: #005f73;
+  font-weight: 800;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inline-form {
+  display: inline-flex;
+  margin-left: 8px;
+}
+
+.hint {
+  color: #516158;
+  margin-top: 12px;
+}
+
+code {
+  background: #eef2e9;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+
+.split {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.detail-grid > div {
+  background: #ffffff;
+  border: 1px solid #d7ddcf;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+dl {
+  display: grid;
+  gap: 8px 14px;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  margin: 0 0 16px;
+}
+
+dt {
+  color: #516158;
+  font-weight: 800;
+}
+
+dd {
+  margin: 0;
+}
+
+.split > div {
+  background: #ffffff;
+  border: 1px solid #d7ddcf;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+li {
+  margin: 8px 0;
+}
+
+@media (max-width: 800px) {
+  header, .upload, .header-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  main {
+    padding: 18px;
+  }
+
+  .stats, .split, .detail-grid, .alias-form {
+    grid-template-columns: 1fr;
+  }
+
+  .alias-form button {
+    grid-column: auto;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+}

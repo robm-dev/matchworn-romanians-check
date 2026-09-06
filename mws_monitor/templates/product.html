@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ player.input_name }} | MWS Value Monitor</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Product details</p>
+      <h1>{{ player.input_name }}</h1>
+    </div>
+    <div class="header-actions">
+      <a class="button secondary" href="/">Dashboard</a>
+      <a class="button" href="{{ product.url }}" target="_blank" rel="noreferrer">View on MWS</a>
+    </div>
+  </header>
+  <main>
+    <section class="detail-grid">
+      <div>
+        <h2>Listing</h2>
+        <dl>
+          <dt>Score</dt><dd>{{ product.bargain_score }}</dd>
+          <dt>Price</dt><dd>€{{ "{:,}".format(product.latest_price_eur or product.final_price_eur or 0) }}</dd>
+          <dt>Status</dt><dd>{{ product.status }}</dd>
+          <dt>Type</dt><dd>{{ product.labels or "-" }}</dd>
+          <dt>MWS team</dt><dd>{{ product.shirt_team or "-" }}</dd>
+          <dt>Event</dt><dd>{{ product.event_name or "-" }}</dd>
+          <dt>Ends</dt><dd>{{ product.end_date.date() if product.end_date else "-" }}</dd>
+          <dt>Reason</dt><dd>{{ product.bargain_reason or "-" }}</dd>
+        </dl>
+        <div class="row-actions">
+          <a class="button" href="{{ product.url }}" target="_blank" rel="noreferrer">View on MWS</a>
+          <a class="button secondary" href="/product/{{ product.id }}/alias">Add Alias</a>
+          <a class="button danger" href="/product/{{ product.id }}/ignore">Ignore</a>
+        </div>
+      </div>
+      <div>
+        <h2>Player</h2>
+        <dl>
+          <dt>Team</dt><dd>{{ player.team or "-" }}</dd>
+          <dt>Market value</dt><dd>€{{ "{:,.0f}".format(player.market_value_eur or 0) }}</dd>
+          <dt>Position</dt><dd>{{ player.position or "-" }}</dd>
+          <dt>Lists</dt><dd>{{ player.categories or "-" }}</dd>
+          <dt>Best rank</dt><dd>{{ player.best_rank or "-" }}</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section>
+      <h2>Other Listings For This Player</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Score</th>
+            <th>Price</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Ends</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in related_products %}
+          <tr>
+            <td>{{ item.bargain_score }}</td>
+            <td>€{{ "{:,}".format(item.latest_price_eur or item.final_price_eur or 0) }}</td>
+            <td>{{ item.labels or "-" }}</td>
+            <td>{{ item.status }}</td>
+            <td>{{ item.end_date.date() if item.end_date else "-" }}</td>
+            <td><a class="button small" href="/product/{{ item.id }}">Details</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
