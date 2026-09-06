@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "17 7 */3 * *"
+    - cron: "27 7 */3 * *"
+    - cron: "37 7 */3 * *"
+    - cron: "47 7 */3 * *"
 
 permissions:
   contents: write
@@ -25,10 +28,20 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
       - name: Run Romanian auction check
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '17 7 */3 * *'
         run: python -m mws_monitor romanian-auctions --players data/romanian_players.csv --output-dir outputs
 
       - name: Run Top 200 U23 auction check
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '27 7 */3 * *'
         run: python -m mws_monitor u23-auctions --players data/top_200_u23_players.csv --output-dir outputs/u23
+
+      - name: Run Top 200 U21 auction check
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '37 7 */3 * *'
+        run: python -m mws_monitor u21-auctions --players data/top_200_u21_players.csv --output-dir outputs/u21
+
+      - name: Run Top 200 U19 auction check
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '47 7 */3 * *'
+        run: python -m mws_monitor u19-auctions --players data/top_200_u19_players.csv --output-dir outputs/u19
 
       - name: Upload latest outputs
         uses: actions/upload-artifact@v4
@@ -37,11 +50,14 @@ jobs:
           path: |
             outputs/latest.*
             outputs/u23/latest.*
+            outputs/u21/latest.*
+            outputs/u19/latest.*
 
       - name: Commit latest outputs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add outputs/latest.csv outputs/latest.json outputs/latest.md outputs/u23/latest.csv outputs/u23/latest.json outputs/u23/latest.md
+          git pull --rebase
+          git add outputs/latest.csv outputs/latest.json outputs/latest.md outputs/u23/latest.csv outputs/u23/latest.json outputs/u23/latest.md outputs/u21/latest.csv outputs/u21/latest.json outputs/u21/latest.md outputs/u19/latest.csv outputs/u19/latest.json outputs/u19/latest.md
           git diff --cached --quiet || git commit -m "Update MWS tracked auction results"
           git push

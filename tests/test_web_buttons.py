@@ -17,6 +17,8 @@ def test_dashboard_button_routes_render():
         "/?view=aliases",
         "/?view=romanian_auctions",
         "/?view=u23_auctions",
+        "/?view=u21_auctions",
+        "/?view=u19_auctions",
         "/export",
         "/crawl",
     ]:
@@ -164,6 +166,52 @@ def test_u23_auction_view_lists_live_auction_links(tmp_path, monkeypatch):
     assert "https://mws.com/us/product/lamine-live" in response.text
 
 
+def test_u21_and_u19_auction_views_list_live_auction_links(tmp_path, monkeypatch):
+    latest = tmp_path / "latest.json"
+    latest.write_text(
+        """
+{
+  "checked_at": "2026-09-06T11:20:47+00:00",
+  "match_count": 1,
+  "matches": [
+    {
+      "checked_at": "2026-09-06T11:20:47+00:00",
+      "player_name": "Estevao",
+      "transfermarkt_team": "Chelsea FC",
+      "position": "Right Winger",
+      "market_value_eur": 60000000,
+      "mws_name": "Estevao",
+      "event_name": "Arsenal - Chelsea",
+      "labels": "Issued, Signed",
+      "current_bid_eur": 100,
+      "current_bid_usd": 117,
+      "end_date_utc": "2026-09-13T15:30:00Z",
+      "slug": "estevao-live",
+      "url": "https://mws.com/us/product/estevao-live"
+    }
+  ]
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("mws_monitor.web.U21_OUTPUT_PATH", latest)
+    monkeypatch.setattr("mws_monitor.web.U19_OUTPUT_PATH", latest)
+
+    client = TestClient(app)
+
+    for view, title, button in [
+        ("u21_auctions", "Top 200 U21 Auctions", "Recheck Top 200 U21"),
+        ("u19_auctions", "Top 200 U19 Auctions", "Recheck Top 200 U19"),
+    ]:
+        response = client.get(f"/?view={view}")
+
+        assert response.status_code == 200
+        assert title in response.text
+        assert button in response.text
+        assert "Estevao" in response.text
+        assert "https://mws.com/us/product/estevao-live" in response.text
+
+
 def test_auction_views_render_sortable_column_buttons(tmp_path, monkeypatch):
     latest = tmp_path / "latest.json"
     latest.write_text(
@@ -178,10 +226,12 @@ def test_auction_views_render_sortable_column_buttons(tmp_path, monkeypatch):
     )
     monkeypatch.setattr("mws_monitor.web.ROMANIAN_OUTPUT_PATH", latest)
     monkeypatch.setattr("mws_monitor.web.U23_OUTPUT_PATH", latest)
+    monkeypatch.setattr("mws_monitor.web.U21_OUTPUT_PATH", latest)
+    monkeypatch.setattr("mws_monitor.web.U19_OUTPUT_PATH", latest)
 
     client = TestClient(app)
 
-    for path in ["/?view=romanian_auctions", "/?view=u23_auctions"]:
+    for path in ["/?view=romanian_auctions", "/?view=u23_auctions", "/?view=u21_auctions", "/?view=u19_auctions"]:
         response = client.get(path)
 
         assert response.status_code == 200
@@ -219,3 +269,40 @@ def test_u23_auction_recheck_runs_checker_and_reports_progress(tmp_path, monkeyp
     assert status["status"] == "complete"
     assert status["percent"] == 100
     assert calls and calls[0][0] == tmp_path / "u23.csv"
+
+
+def test_u21_and_u19_auction_rechecks_run_checker_and_report_progress(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_run(player_list_path, output_dir, settings):
+        calls.append((player_list_path, output_dir, settings.mws_web_base_url))
+        return []
+
+    class ImmediateThread:
+        def __init__(self, target, daemon):
+            self.target = target
+            self.daemon = daemon
+
+        def start(self):
+            self.target()
+
+    monkeypatch.setattr("mws_monitor.web.U21_PLAYERS_PATH", tmp_path / "u21.csv")
+    monkeypatch.setattr("mws_monitor.web.U21_OUTPUT_DIR", tmp_path / "u21_outputs")
+    monkeypatch.setattr("mws_monitor.web.U19_PLAYERS_PATH", tmp_path / "u19.csv")
+    monkeypatch.setattr("mws_monitor.web.U19_OUTPUT_DIR", tmp_path / "u19_outputs")
+    monkeypatch.setattr("mws_monitor.web.run_romanian_auctions", fake_run)
+    monkeypatch.setattr("mws_monitor.web.Thread", ImmediateThread)
+
+    client = TestClient(app)
+
+    for endpoint in ["/u21-auctions/recheck", "/u19-auctions/recheck"]:
+        response = client.post(endpoint)
+
+        assert response.status_code == 200
+        job_id = response.json()["job_id"]
+        status = client.get(f"{endpoint}/status/{job_id}").json()
+        assert status["status"] == "complete"
+        assert status["percent"] == 100
+
+    assert calls[0][0] == tmp_path / "u21.csv"
+    assert calls[1][0] == tmp_path / "u19.csv"

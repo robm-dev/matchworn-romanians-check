@@ -30,11 +30,23 @@ jobs:
       - name: Refresh Top 200 U23 player list
         run: python -m mws_monitor update-u23-players --output data/top_200_u23_players.csv --limit 200 --delay 1
 
+      - name: Refresh Top 200 U21 player list
+        run: python -m mws_monitor update-u21-players --output data/top_200_u21_players.csv --limit 200 --delay 1
+
+      - name: Refresh Top 200 U19 player list
+        run: python -m mws_monitor update-u19-players --output data/top_200_u19_players.csv --limit 200 --delay 1
+
       - name: Run Romanian auction check
         run: python -m mws_monitor romanian-auctions --players data/romanian_players.csv --output-dir outputs
 
       - name: Run Top 200 U23 auction check
         run: python -m mws_monitor u23-auctions --players data/top_200_u23_players.csv --output-dir outputs/u23
+
+      - name: Run Top 200 U21 auction check
+        run: python -m mws_monitor u21-auctions --players data/top_200_u21_players.csv --output-dir outputs/u21
+
+      - name: Run Top 200 U19 auction check
+        run: python -m mws_monitor u19-auctions --players data/top_200_u19_players.csv --output-dir outputs/u19
 
       - name: Upload refreshed data
         uses: actions/upload-artifact@v4
@@ -43,13 +55,18 @@ jobs:
           path: |
             data/romanian_players.csv
             data/top_200_u23_players.csv
+            data/top_200_u21_players.csv
+            data/top_200_u19_players.csv
             outputs/latest.*
             outputs/u23/latest.*
+            outputs/u21/latest.*
+            outputs/u19/latest.*
 
       - name: Commit refreshed data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/romanian_players.csv data/top_200_u23_players.csv outputs/latest.csv outputs/latest.json outputs/latest.md outputs/u23/latest.csv outputs/u23/latest.json outputs/u23/latest.md
+          git pull --rebase
+          git add data/romanian_players.csv data/top_200_u23_players.csv data/top_200_u21_players.csv data/top_200_u19_players.csv outputs/latest.csv outputs/latest.json outputs/latest.md outputs/u23/latest.csv outputs/u23/latest.json outputs/u23/latest.md outputs/u21/latest.csv outputs/u21/latest.json outputs/u21/latest.md outputs/u19/latest.csv outputs/u19/latest.json outputs/u19/latest.md
           git diff --cached --quiet || git commit -m "Refresh tracked player lists and MWS outputs"
           git push

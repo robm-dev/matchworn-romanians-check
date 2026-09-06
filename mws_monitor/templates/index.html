@@ -16,6 +16,8 @@
       <a class="button secondary" href="/export">Export CSV</a>
       <a class="button secondary" href="/?view=romanian_auctions">Romanian Auctions</a>
       <a class="button secondary" href="/?view=u23_auctions">Top 200 U23</a>
+      <a class="button secondary" href="/?view=u21_auctions">Top 200 U21</a>
+      <a class="button secondary" href="/?view=u19_auctions">Top 200 U19</a>
       <form action="/crawl" method="post">
         <button type="submit">Crawl now</button>
       </form>
@@ -40,6 +42,8 @@
       <a class="button {{ 'active' if view == 'aliases' else '' }}" href="/?view=aliases">Aliases</a>
       <a class="button {{ 'active' if view == 'romanian_auctions' else '' }}" href="/?view=romanian_auctions">Romanian Auctions</a>
       <a class="button {{ 'active' if view == 'u23_auctions' else '' }}" href="/?view=u23_auctions">Top 200 U23</a>
+      <a class="button {{ 'active' if view == 'u21_auctions' else '' }}" href="/?view=u21_auctions">Top 200 U21</a>
+      <a class="button {{ 'active' if view == 'u19_auctions' else '' }}" href="/?view=u19_auctions">Top 200 U19</a>
       <a class="button secondary" href="/export">Export CSV</a>
     </nav>
 
@@ -225,6 +229,122 @@
     </section>
     {% endif %}
 
+    {% if view == "u21_auctions" %}
+    <section>
+      <div class="section-header">
+        <div>
+          <h2>Top 200 U21 Auctions</h2>
+          <p class="hint">
+            {{ u21_report.match_count }} live auction{{ '' if u21_report.match_count == 1 else 's' }}
+            {% if u21_report.checked_at %}checked at {{ u21_report.checked_at }}{% endif %}
+          </p>
+        </div>
+        <form action="/u21-auctions/recheck" method="post" id="u21-recheck-form">
+          <button type="submit" id="u21-recheck-button">Recheck Top 200 U21</button>
+        </form>
+      </div>
+      <div class="progress-panel" id="u21-recheck-progress" hidden>
+        <div class="progress-track">
+          <div class="progress-fill" id="u21-recheck-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="u21-recheck-message">Queued</span>
+          <strong id="u21-recheck-percent">0%</strong>
+        </div>
+      </div>
+      <table data-sortable-table>
+        <thead>
+          <tr>
+            <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for auction in u21_report.matches %}
+          <tr>
+            <td>
+              <strong>{{ auction.player_name }}</strong>
+              <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
+            </td>
+            <td>{{ auction.labels or "Auction" }}</td>
+            <td>{{ auction.event_name or "-" }}</td>
+            <td>
+              {% if auction.current_bid_eur %}€{{ "{:,}".format(auction.current_bid_eur) }}{% else %}-{% endif %}
+              {% if auction.current_bid_usd %}<span class="muted">${{ "{:,}".format(auction.current_bid_usd) }}</span>{% endif %}
+            </td>
+            <td>{{ auction.end_date_utc or "-" }}</td>
+            <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6">No Top 200 U21 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    {% if view == "u19_auctions" %}
+    <section>
+      <div class="section-header">
+        <div>
+          <h2>Top 200 U19 Auctions</h2>
+          <p class="hint">
+            {{ u19_report.match_count }} live auction{{ '' if u19_report.match_count == 1 else 's' }}
+            {% if u19_report.checked_at %}checked at {{ u19_report.checked_at }}{% endif %}
+          </p>
+        </div>
+        <form action="/u19-auctions/recheck" method="post" id="u19-recheck-form">
+          <button type="submit" id="u19-recheck-button">Recheck Top 200 U19</button>
+        </form>
+      </div>
+      <div class="progress-panel" id="u19-recheck-progress" hidden>
+        <div class="progress-track">
+          <div class="progress-fill" id="u19-recheck-fill"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="u19-recheck-message">Queued</span>
+          <strong id="u19-recheck-percent">0%</strong>
+        </div>
+      </div>
+      <table data-sortable-table>
+        <thead>
+          <tr>
+            <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for auction in u19_report.matches %}
+          <tr>
+            <td>
+              <strong>{{ auction.player_name }}</strong>
+              <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
+            </td>
+            <td>{{ auction.labels or "Auction" }}</td>
+            <td>{{ auction.event_name or "-" }}</td>
+            <td>
+              {% if auction.current_bid_eur %}€{{ "{:,}".format(auction.current_bid_eur) }}{% else %}-{% endif %}
+              {% if auction.current_bid_usd %}<span class="muted">${{ "{:,}".format(auction.current_bid_usd) }}</span>{% endif %}
+            </td>
+            <td>{{ auction.end_date_utc or "-" }}</td>
+            <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6">No Top 200 U19 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
     {% if view == "watchlist" %}
     <section>
       <h2>Player Watchlist</h2>
@@ -395,6 +515,24 @@
       percentId: "u23-recheck-percent",
       messageId: "u23-recheck-message",
       redirect: "/?view=u23_auctions",
+    });
+    wireRecheck({
+      formId: "u21-recheck-form",
+      buttonId: "u21-recheck-button",
+      panelId: "u21-recheck-progress",
+      fillId: "u21-recheck-fill",
+      percentId: "u21-recheck-percent",
+      messageId: "u21-recheck-message",
+      redirect: "/?view=u21_auctions",
+    });
+    wireRecheck({
+      formId: "u19-recheck-form",
+      buttonId: "u19-recheck-button",
+      panelId: "u19-recheck-progress",
+      fillId: "u19-recheck-fill",
+      percentId: "u19-recheck-percent",
+      messageId: "u19-recheck-message",
+      redirect: "/?view=u19_auctions",
     });
 
     document.querySelectorAll("[data-sortable-table]").forEach((table) => {

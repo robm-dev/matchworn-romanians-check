@@ -23,6 +23,14 @@ TOP_PLAYER_FIELDS = [
 ]
 
 
+def default_top_players_url(age_class: str) -> str:
+    return (
+        "https://www.transfermarkt.com/spieler-statistik/wertvollstespieler/marktwertetop/plus/0/galerie/0"
+        f"?ausrichtung=alle&spielerposition_id=alle&altersklasse={age_class}&jahrgang=0&land_id=0"
+        "&kontinent_id=0&jahr=2025&yt0=show&page=1"
+    )
+
+
 def parse_top_players(html: str, list_source_url: str) -> list[dict[str, str]]:
     soup = BeautifulSoup(html, "html.parser")
     rows = []

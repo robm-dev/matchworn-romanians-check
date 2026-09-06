@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from mws_monitor.transfermarkt_top_players import parse_top_players, update_top_players_csv
+from mws_monitor.transfermarkt_top_players import default_top_players_url, parse_top_players, update_top_players_csv
 
 
 def test_parse_top_players_extracts_rows_from_transfermarkt_html():
@@ -56,6 +56,12 @@ def test_update_top_players_csv_paginates_to_limit(tmp_path: Path):
     assert "Player 1" in text
     assert "Player 2" in text
     assert calls == [base_url, "https://www.transfermarkt.com/top?page=2"]
+
+
+def test_default_top_players_url_uses_requested_age_class():
+    assert "altersklasse=u21" in default_top_players_url("u21")
+    assert "altersklasse=u19" in default_top_players_url("u19")
+    assert "page=1" in default_top_players_url("u23")
 
 
 def _html_for(rank: str, name: str) -> str:
