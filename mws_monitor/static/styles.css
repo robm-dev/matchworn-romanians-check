@@ -145,6 +145,37 @@ input {
   margin-bottom: 14px;
 }
 
+.progress-panel {
+  background: #ffffff;
+  border: 1px solid #d7ddcf;
+  border-radius: 8px;
+  margin: 0 0 14px;
+  padding: 12px;
+}
+
+.progress-track {
+  background: #eef2e9;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: #93ad28;
+  height: 100%;
+  transition: width 180ms ease;
+  width: 0;
+}
+
+.progress-meta {
+  align-items: center;
+  color: #516158;
+  display: flex;
+  font-size: 13px;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
 .upload form {
   align-items: center;
   display: flex;

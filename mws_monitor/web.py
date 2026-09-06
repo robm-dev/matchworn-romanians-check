@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from threading import Lock, Thread
+from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
@@ -26,6 +28,8 @@ app.mount("/static", StaticFiles(directory=str(ROOT / "mws_monitor" / "static"))
 ROMANIAN_PLAYERS_PATH = ROOT / "data" / "romanian_players.csv"
 ROMANIAN_OUTPUT_DIR = ROOT / "outputs"
 ROMANIAN_OUTPUT_PATH = ROMANIAN_OUTPUT_DIR / "latest.json"
+_romanian_recheck_jobs: dict[str, dict] = {}
+_romanian_recheck_lock = Lock()
 
 
 def get_session():
@@ -57,6 +61,24 @@ def load_romanian_auction_report() -> dict:
         "match_count": data.get("match_count") or len(data.get("matches") or []),
         "matches": data.get("matches") or [],
     }
+
+
+def _set_romanian_job(job_id: str, *, percent: int, status: str, message: str, error: str | None = None) -> None:
+    with _romanian_recheck_lock:
+        job = _romanian_recheck_jobs.setdefault(job_id, {})
+        job.update({"percent": percent, "status": status, "message": message, "error": error})
+
+
+def _run_romanian_recheck_job(job_id: str) -> None:
+    try:
+        _set_romanian_job(job_id, percent=15, status="running", message="Loading Romanian player list")
+        settings = load_settings()
+        _set_romanian_job(job_id, percent=35, status="running", message="Fetching live MatchWornShirt auctions")
+        run_romanian_auctions(ROMANIAN_PLAYERS_PATH, ROMANIAN_OUTPUT_DIR, settings)
+        _set_romanian_job(job_id, percent=90, status="running", message="Writing latest results")
+        _set_romanian_job(job_id, percent=100, status="complete", message="Recheck complete")
+    except Exception as exc:
+        _set_romanian_job(job_id, percent=100, status="failed", message="Recheck failed", error=str(exc))
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -148,9 +170,19 @@ def crawl_get_hint():
 
 @app.post("/romanian-auctions/recheck")
 def recheck_romanian_auctions():
-    settings = load_settings()
-    run_romanian_auctions(ROMANIAN_PLAYERS_PATH, ROMANIAN_OUTPUT_DIR, settings)
-    return RedirectResponse("/?view=romanian_auctions", status_code=303)
+    job_id = uuid4().hex
+    _set_romanian_job(job_id, percent=0, status="queued", message="Queued")
+    Thread(target=lambda: _run_romanian_recheck_job(job_id), daemon=True).start()
+    return JSONResponse({"job_id": job_id, "status_url": f"/romanian-auctions/recheck/status/{job_id}"})
+
+
+@app.get("/romanian-auctions/recheck/status/{job_id}")
+def romanian_auction_recheck_status(job_id: str):
+    with _romanian_recheck_lock:
+        job = _romanian_recheck_jobs.get(job_id)
+    if not job:
+        return JSONResponse({"status": "missing", "percent": 100, "message": "Job not found"}, status_code=404)
+    return job
 
 
 @app.get("/export")

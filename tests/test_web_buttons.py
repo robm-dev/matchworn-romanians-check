@@ -77,7 +77,7 @@ def test_romanian_auction_view_lists_live_auction_links(tmp_path, monkeypatch):
     assert "View Auction" in response.text
 
 
-def test_romanian_auction_recheck_runs_checker_and_redirects(tmp_path, monkeypatch):
+def test_romanian_auction_recheck_runs_checker_and_reports_progress(tmp_path, monkeypatch):
     calls = []
 
     def fake_run(player_list_path, output_dir, settings):
@@ -100,12 +100,25 @@ def test_romanian_auction_recheck_runs_checker_and_redirects(tmp_path, monkeypat
             )
         ]
 
+    class ImmediateThread:
+        def __init__(self, target, daemon):
+            self.target = target
+            self.daemon = daemon
+
+        def start(self):
+            self.target()
+
     monkeypatch.setattr("mws_monitor.web.ROMANIAN_PLAYERS_PATH", tmp_path / "players.csv")
     monkeypatch.setattr("mws_monitor.web.ROMANIAN_OUTPUT_DIR", tmp_path / "outputs")
     monkeypatch.setattr("mws_monitor.web.run_romanian_auctions", fake_run)
+    monkeypatch.setattr("mws_monitor.web.Thread", ImmediateThread)
 
-    response = TestClient(app).post("/romanian-auctions/recheck", follow_redirects=False)
+    client = TestClient(app)
+    response = client.post("/romanian-auctions/recheck")
 
-    assert response.status_code == 303
-    assert response.headers["location"] == "/?view=romanian_auctions"
+    assert response.status_code == 200
+    job_id = response.json()["job_id"]
+    status = client.get(f"/romanian-auctions/recheck/status/{job_id}").json()
+    assert status["status"] == "complete"
+    assert status["percent"] == 100
     assert calls and calls[0][0] == tmp_path / "players.csv"
