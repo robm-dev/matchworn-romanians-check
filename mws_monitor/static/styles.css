@@ -224,6 +224,30 @@ th {
   color: #2a342f;
 }
 
+.sort-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  display: inline-flex;
+  font: inherit;
+  gap: 6px;
+  justify-content: flex-start;
+  min-height: 20px;
+  padding: 0;
+  width: 100%;
+}
+
+.sort-button:hover {
+  color: #005f73;
+}
+
+.sort-button span {
+  display: inline-block;
+  min-width: 12px;
+}
+
 a {
   color: #005f73;
   font-weight: 800;

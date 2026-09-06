@@ -164,6 +164,32 @@ def test_u23_auction_view_lists_live_auction_links(tmp_path, monkeypatch):
     assert "https://mws.com/us/product/lamine-live" in response.text
 
 
+def test_auction_views_render_sortable_column_buttons(tmp_path, monkeypatch):
+    latest = tmp_path / "latest.json"
+    latest.write_text(
+        """
+{
+  "checked_at": "2026-09-06T11:20:47+00:00",
+  "match_count": 0,
+  "matches": []
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("mws_monitor.web.ROMANIAN_OUTPUT_PATH", latest)
+    monkeypatch.setattr("mws_monitor.web.U23_OUTPUT_PATH", latest)
+
+    client = TestClient(app)
+
+    for path in ["/?view=romanian_auctions", "/?view=u23_auctions"]:
+        response = client.get(path)
+
+        assert response.status_code == 200
+        assert response.text.count('class="sort-button"') >= 6
+        assert 'data-sort-type="number"' in response.text
+        assert 'data-sort-type="date"' in response.text
+
+
 def test_u23_auction_recheck_runs_checker_and_reports_progress(tmp_path, monkeypatch):
     calls = []
 

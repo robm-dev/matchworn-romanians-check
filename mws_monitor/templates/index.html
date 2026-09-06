@@ -132,15 +132,15 @@
           <strong id="romanian-recheck-percent">0%</strong>
         </div>
       </div>
-      <table>
+      <table data-sortable-table>
         <thead>
           <tr>
-            <th>Player</th>
-            <th>Item</th>
-            <th>Event</th>
-            <th>Bid</th>
-            <th>Ends</th>
-            <th>Action</th>
+            <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -190,15 +190,15 @@
           <strong id="u23-recheck-percent">0%</strong>
         </div>
       </div>
-      <table>
+      <table data-sortable-table>
         <thead>
           <tr>
-            <th>Player</th>
-            <th>Item</th>
-            <th>Event</th>
-            <th>Bid</th>
-            <th>Ends</th>
-            <th>Action</th>
+            <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -396,6 +396,51 @@
       messageId: "u23-recheck-message",
       redirect: "/?view=u23_auctions",
     });
+
+    document.querySelectorAll("[data-sortable-table]").forEach((table) => {
+      const buttons = table.querySelectorAll(".sort-button");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const column = Number(button.dataset.sortColumn);
+          const type = button.dataset.sortType || "text";
+          const tbody = table.querySelector("tbody");
+          const rows = Array.from(tbody.querySelectorAll("tr")).filter((row) => row.cells.length > column);
+          const nextDirection = button.dataset.direction === "asc" ? "desc" : "asc";
+          const multiplier = nextDirection === "asc" ? 1 : -1;
+
+          rows.sort((a, b) => {
+            const left = sortableValue(a.cells[column], type);
+            const right = sortableValue(b.cells[column], type);
+            if (left < right) return -1 * multiplier;
+            if (left > right) return 1 * multiplier;
+            return 0;
+          });
+
+          rows.forEach((row) => tbody.appendChild(row));
+          buttons.forEach((other) => {
+            other.dataset.direction = "";
+            const indicator = other.querySelector("span");
+            if (indicator) indicator.textContent = "";
+          });
+          button.dataset.direction = nextDirection;
+          const indicator = button.querySelector("span");
+          if (indicator) indicator.textContent = nextDirection === "asc" ? "▲" : "▼";
+        });
+      });
+    });
+
+    const sortableValue = (cell, type) => {
+      const text = cell.textContent.trim();
+      if (type === "number") {
+        const match = text.replace(/,/g, "").match(/-?\d+(\.\d+)?/);
+        return match ? Number(match[0]) : -Infinity;
+      }
+      if (type === "date") {
+        const timestamp = Date.parse(text);
+        return Number.isNaN(timestamp) ? Infinity : timestamp;
+      }
+      return text.toLocaleLowerCase();
+    };
   </script>
 </body>
 </html>
