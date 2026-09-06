@@ -137,6 +137,14 @@ input {
   margin: 0 0 24px;
 }
 
+.section-header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
 .upload form {
   align-items: center;
   display: flex;
@@ -206,6 +214,13 @@ a {
   margin-top: 12px;
 }
 
+.muted {
+  color: #516158;
+  display: block;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
 code {
   background: #eef2e9;
   border-radius: 4px;
@@ -259,7 +274,7 @@ li {
 }
 
 @media (max-width: 800px) {
-  header, .upload, .header-actions {
+  header, .upload, .header-actions, .section-header {
     align-items: stretch;
     flex-direction: column;
   }

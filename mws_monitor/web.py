@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from .config import ROOT, load_settings
 from .db import SessionLocal, init_db
 from .importer import import_watchlist
 from .models import Alert, MwsProduct, Player, PlayerAlias, ReviewQueue
+from .romanian_auctions import run_romanian_auctions
 from .service import MonitorService, export_results
 
 
@@ -21,6 +23,9 @@ init_db()
 app = FastAPI(title="MWS Value Monitor")
 templates = Jinja2Templates(directory=str(ROOT / "mws_monitor" / "templates"))
 app.mount("/static", StaticFiles(directory=str(ROOT / "mws_monitor" / "static")), name="static")
+ROMANIAN_PLAYERS_PATH = ROOT / "data" / "romanian_players.csv"
+ROMANIAN_OUTPUT_DIR = ROOT / "outputs"
+ROMANIAN_OUTPUT_PATH = ROMANIAN_OUTPUT_DIR / "latest.json"
 
 
 def get_session():
@@ -37,6 +42,21 @@ def aware_dt(value: datetime | None) -> datetime | None:
     if value.tzinfo is None:
         return value.replace(tzinfo=timezone.utc)
     return value
+
+
+def load_romanian_auction_report() -> dict:
+    if not ROMANIAN_OUTPUT_PATH.exists():
+        return {"checked_at": None, "match_count": 0, "matches": []}
+    try:
+        with ROMANIAN_OUTPUT_PATH.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (json.JSONDecodeError, OSError):
+        return {"checked_at": None, "match_count": 0, "matches": []}
+    return {
+        "checked_at": data.get("checked_at"),
+        "match_count": data.get("match_count") or len(data.get("matches") or []),
+        "matches": data.get("matches") or [],
+    }
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -72,6 +92,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
     alerts = session.scalars(select(Alert).order_by(Alert.created_at.desc()).limit(20)).all()
     players = session.scalars(select(Player).order_by(Player.market_value_eur.desc()).limit(200)).all()
     aliases = session.scalars(select(PlayerAlias).order_by(PlayerAlias.input_name.asc())).all()
+    romanian_report = load_romanian_auction_report()
     alias_player = request.query_params.get("alias_player", "")
     alias_athlete = request.query_params.get("alias_athlete", "")
     alias_category = request.query_params.get("alias_category", "")
@@ -93,6 +114,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
             "view": view,
             "players": players,
             "aliases": aliases,
+            "romanian_report": romanian_report,
             "alias_player": alias_player,
             "alias_athlete": alias_athlete,
             "alias_category": alias_category,
@@ -122,6 +144,13 @@ def crawl(session: Session = Depends(get_session)):
 @app.get("/crawl")
 def crawl_get_hint():
     return RedirectResponse("/", status_code=303)
+
+
+@app.post("/romanian-auctions/recheck")
+def recheck_romanian_auctions():
+    settings = load_settings()
+    run_romanian_auctions(ROMANIAN_PLAYERS_PATH, ROMANIAN_OUTPUT_DIR, settings)
+    return RedirectResponse("/?view=romanian_auctions", status_code=303)
 
 
 @app.get("/export")

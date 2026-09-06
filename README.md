@@ -13,6 +13,14 @@ pip install -r requirements.txt
 python -m mws_monitor romanian-auctions
 ```
 
+Open the local web interface:
+
+```bash
+python -m mws_monitor serve --host 127.0.0.1 --port 8765
+```
+
+Then visit `http://127.0.0.1:8765/?view=romanian_auctions` and use **Recheck Romanian Auctions** to refresh the live auction list.
+
 Use another player list if needed:
 
 ```bash
