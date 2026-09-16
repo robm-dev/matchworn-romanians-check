@@ -1,9 +1,8 @@
 # Romanian MWS Auction Matches
 
-Checked at: 2026-09-06T11:34:33.457356+00:00
+Checked at: 2026-09-16T13:14:12.033852+00:00
 
 | Player | Item | Event | Bid EUR | Bid USD | Ends UTC |
 |---|---|---|---:|---:|---|
-| Ioan Vermeșan | [Issued, Signed](https://mws.com/us/product/ioan-vermesan-20kkpqv2nk6a80R5BMjSzg) | Calcio Padova - Hellas Verona FC | 68 | 80 | 2026-09-07T16:00:00Z |
-| Radu Drăgușin | [Issued, Signed](https://mws.com/us/product/radu-drguin-2zfxoES_jkWDkU1Fy1O_xQ-51) | ACF Fiorentina - Frosinone | 363 | 422 | 2026-09-09T16:30:00Z |
-| Radu Drăgușin | [Worn, Signed](https://mws.com/us/product/radu-drguin-MBsfL62RVkGR5U9osKYxTQ) | ACF Fiorentina - Torino FC | 121 | 140 | 2026-09-14T16:00:00Z |
+| Radu Drăgușin | [Worn, Signed](https://mws.com/us/product/radu-drguin-84g0BA5Ch0mCkwyyxfPwrw) | Venezia FC - ACF Fiorentina | 151 | 175 | 2026-09-18T16:30:00Z |
+| Rareș Ilie | [Worn, Signed](https://mws.com/us/product/rare-ilie-FS1P4y2-qUeP3rxyUDQ-zg) | Mantova 1911 - UC Sampdoria | 141 | 163 | 2026-09-20T13:30:00Z |
