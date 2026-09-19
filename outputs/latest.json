@@ -1,36 +1,5 @@
 {
-  "checked_at": "2026-09-16T13:14:12.033852+00:00",
-  "match_count": 2,
-  "matches": [
-    {
-      "checked_at": "2026-09-16T13:14:12.033852+00:00",
-      "player_name": "Radu Drăgușin",
-      "transfermarkt_team": "ACF Fiorentina",
-      "position": "Fundaș central",
-      "market_value_eur": 16000000,
-      "mws_name": "Radu Drăgușin",
-      "event_name": "Venezia FC - ACF Fiorentina",
-      "labels": "Worn, Signed",
-      "current_bid_eur": 151,
-      "current_bid_usd": 175,
-      "end_date_utc": "2026-09-18T16:30:00Z",
-      "slug": "radu-drguin-84g0BA5Ch0mCkwyyxfPwrw",
-      "url": "https://mws.com/us/product/radu-drguin-84g0BA5Ch0mCkwyyxfPwrw"
-    },
-    {
-      "checked_at": "2026-09-16T13:14:12.033852+00:00",
-      "player_name": "Rareș Ilie",
-      "transfermarkt_team": "Mantova 1911",
-      "position": "Mijlocaș ofensiv",
-      "market_value_eur": 1200000,
-      "mws_name": "Rareș Ilie",
-      "event_name": "Mantova 1911 - UC Sampdoria",
-      "labels": "Worn, Signed",
-      "current_bid_eur": 141,
-      "current_bid_usd": 163,
-      "end_date_utc": "2026-09-20T13:30:00Z",
-      "slug": "rare-ilie-FS1P4y2-qUeP3rxyUDQ-zg",
-      "url": "https://mws.com/us/product/rare-ilie-FS1P4y2-qUeP3rxyUDQ-zg"
-    }
-  ]
+  "checked_at": "2026-09-19T09:24:33.097156+00:00",
+  "match_count": 0,
+  "matches": []
 }
