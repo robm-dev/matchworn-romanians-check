@@ -103,7 +103,10 @@ def test_write_outputs_creates_csv_json_and_markdown(tmp_path: Path):
     assert (tmp_path / "latest.csv").read_text(encoding="utf-8").splitlines()[0].startswith("checked_at")
     data = json.loads((tmp_path / "latest.json").read_text(encoding="utf-8"))
     assert data["match_count"] == 1
-    assert "Radu Drăgușin" in (tmp_path / "latest.md").read_text(encoding="utf-8")
+    md = (tmp_path / "latest.md").read_text(encoding="utf-8")
+    assert "Radu Drăgușin" in md
+    assert "| Player | Market value |" in md
+    assert "16000000" in md
 
 
 def _player(name: str, team: str, market_value_eur: int):

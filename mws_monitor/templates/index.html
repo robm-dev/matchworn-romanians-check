@@ -140,11 +140,12 @@
         <thead>
           <tr>
             <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="number">Market value <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="6" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -154,6 +155,7 @@
               <strong>{{ auction.player_name }}</strong>
               <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
             </td>
+            <td>€{{ "{:,.0f}".format(auction.market_value_eur or 0) }}</td>
             <td>{{ auction.labels or "Auction" }}</td>
             <td>{{ auction.event_name or "-" }}</td>
             <td>
@@ -164,7 +166,7 @@
             <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="6">No Romanian live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          <tr><td colspan="7">No Romanian live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -198,11 +200,12 @@
         <thead>
           <tr>
             <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="number">Market value <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="6" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -212,6 +215,7 @@
               <strong>{{ auction.player_name }}</strong>
               <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
             </td>
+            <td>€{{ "{:,.0f}".format(auction.market_value_eur or 0) }}</td>
             <td>{{ auction.labels or "Auction" }}</td>
             <td>{{ auction.event_name or "-" }}</td>
             <td>
@@ -222,7 +226,7 @@
             <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="6">No Top 200 U23 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          <tr><td colspan="7">No Top 200 U23 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -256,11 +260,12 @@
         <thead>
           <tr>
             <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="number">Market value <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="6" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -270,6 +275,7 @@
               <strong>{{ auction.player_name }}</strong>
               <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
             </td>
+            <td>€{{ "{:,.0f}".format(auction.market_value_eur or 0) }}</td>
             <td>{{ auction.labels or "Auction" }}</td>
             <td>{{ auction.event_name or "-" }}</td>
             <td>
@@ -280,7 +286,7 @@
             <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="6">No Top 200 U21 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          <tr><td colspan="7">No Top 200 U21 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -314,11 +320,12 @@
         <thead>
           <tr>
             <th><button class="sort-button" type="button" data-sort-column="0" data-sort-type="text">Player <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
-            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="1" data-sort-type="number">Market value <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="2" data-sort-type="text">Item <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="3" data-sort-type="text">Event <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="4" data-sort-type="number">Bid <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="5" data-sort-type="date">Ends <span aria-hidden="true"></span></button></th>
+            <th><button class="sort-button" type="button" data-sort-column="6" data-sort-type="text">Action <span aria-hidden="true"></span></button></th>
           </tr>
         </thead>
         <tbody>
@@ -328,6 +335,7 @@
               <strong>{{ auction.player_name }}</strong>
               <span class="muted">{{ auction.transfermarkt_team or "-" }}</span>
             </td>
+            <td>€{{ "{:,.0f}".format(auction.market_value_eur or 0) }}</td>
             <td>{{ auction.labels or "Auction" }}</td>
             <td>{{ auction.event_name or "-" }}</td>
             <td>
@@ -338,7 +346,7 @@
             <td><a class="button small" href="{{ auction.url }}" target="_blank" rel="noreferrer">View Auction</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="6">No Top 200 U19 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
+          <tr><td colspan="7">No Top 200 U19 live auctions found. Recheck to refresh MatchWornShirt.</td></tr>
           {% endfor %}
         </tbody>
       </table>

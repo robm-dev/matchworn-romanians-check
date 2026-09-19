@@ -7,6 +7,7 @@ import uvicorn
 from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy import select
 
+from .backup_snapshots import run_backup
 from .config import load_settings
 from .db import init_db, session_scope
 from .importer import import_watchlist
@@ -145,6 +146,21 @@ def cmd_u19_auctions(args: argparse.Namespace) -> None:
     print(f"Matched {len(matches)} live bidding shirts. Wrote latest.csv, latest.json, and latest.md to {args.output_dir}.")
 
 
+def cmd_backup_snapshots(args: argparse.Namespace) -> None:
+    result = run_backup(
+        repo_root=Path(args.repo_root),
+        backup_root=Path(args.backup_root) if args.backup_root else None,
+        week_id=args.week,
+    )
+    print(
+        f"Backup week {result['week_id']}: "
+        f"{len(result['main_copied'])} files to main, "
+        f"{len(result['week_copied'])} files to weekly/{result['week_id']}."
+    )
+    if result["skipped"]:
+        print(f"Skipped missing: {', '.join(result['skipped'])}")
+
+
 def cmd_update_romanian_players(args: argparse.Namespace) -> None:
     count = update_romanian_player_csv(
         source_csv_path=args.source,
@@ -257,6 +273,15 @@ def build_parser() -> argparse.ArgumentParser:
     u19.add_argument("--players", default="data/top_200_u19_players.csv", help="CSV/XLSX player list")
     u19.add_argument("--output-dir", default="outputs/u19", help="Directory for latest.csv/latest.json/latest.md")
     u19.set_defaults(func=cmd_u19_auctions)
+
+    backup = sub.add_parser(
+        "backup-snapshots",
+        help="Copy Transfermarkt lists + MWS outputs into backups/main and backups/weekly/YYYY-Www",
+    )
+    backup.add_argument("--repo-root", default=".", help="Repository root containing data/ and outputs/")
+    backup.add_argument("--backup-root", default=None, help="Override backups directory (default: <repo>/backups)")
+    backup.add_argument("--week", default=None, help="ISO week id like 2026-W38 (default: current UTC week)")
+    backup.set_defaults(func=cmd_backup_snapshots)
 
     update_ro = sub.add_parser("update-romanian-players", help="Refresh data/romanian_players.csv from Transfermarkt source pages")
     update_ro.add_argument("--source", default="data/romanian_players.csv", help="Existing CSV used to discover Transfermarkt source pages")

@@ -62,6 +62,8 @@ python -m mws_monitor update-u19-players
 - `outputs/u19/latest.csv`: Top 200 U19 auction results
 - `outputs/u19/latest.json`: Top 200 U19 structured results
 - `outputs/u19/latest.md`: Top 200 U19 quick summary
+- `backups/main/`: latest snapshot of Transfermarkt lists + MWS outputs
+- `backups/weekly/YYYY-Www/`: one ISO-week snapshot (older weeks are kept)
 
 Each row includes the player, Transfermarkt team, market value, MWS item labels, current EUR/USD bid, closing time, and product URL.
 
@@ -96,6 +98,15 @@ The workflow:
 4. Commits changed outputs back to the repository.
 
 `.github/workflows/update-player-lists.yml` runs monthly on the 1st day of the month. It refreshes `data/romanian_players.csv`, `data/top_200_u23_players.csv`, `data/top_200_u21_players.csv`, and `data/top_200_u19_players.csv` from Transfermarkt, reruns all MWS checks, uploads the files, and commits any changes.
+
+### Weekly backups
+
+Every Monday at 10:00 UTC (`0 10 * * 1`), and on manual dispatch:
+
+- Copies Transfermarkt lists (`data/*.csv`) and MWS outputs (`outputs/**/latest.*`) into:
+  - `backups/main/` (always overwritten with the latest copy)
+  - `backups/weekly/YYYY-Www/` (one folder per ISO week; prior weeks are kept)
+- Local equivalent: `python -m mws_monitor backup-snapshots`
 
 ## Port To Another Machine
 

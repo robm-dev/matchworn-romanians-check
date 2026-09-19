@@ -200,16 +200,17 @@ def _markdown(matches: list[AuctionMatch], checked_at_iso: str) -> str:
         "",
         f"Checked at: {checked_at_iso}",
         "",
-        "| Player | Item | Event | Bid EUR | Bid USD | Ends UTC |",
-        "|---|---|---|---:|---:|---|",
+        "| Player | Market value | Item | Event | Bid EUR | Bid USD | Ends UTC |",
+        "|---|---:|---|---|---:|---:|---|",
     ]
     for match in matches:
+        market = match.market_value_eur if match.market_value_eur is not None else ""
         lines.append(
-            f"| {match.player_name} | [{match.labels or 'Auction'}]({match.url}) | {match.event_name} | "
+            f"| {match.player_name} | {market} | [{match.labels or 'Auction'}]({match.url}) | {match.event_name} | "
             f"{match.current_bid_eur or ''} | {match.current_bid_usd or ''} | {match.end_date_utc} |"
         )
     if not matches:
-        lines.append("| No matches |  |  |  |  |  |")
+        lines.append("| No matches |  |  |  |  |  |  |")
     lines.append("")
     return "\n".join(lines)
 

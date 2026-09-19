@@ -78,6 +78,45 @@ def test_romanian_auction_view_lists_live_auction_links(tmp_path, monkeypatch):
     assert "Radu Drăgușin" in response.text
     assert "https://mws.com/us/product/radu-live" in response.text
     assert "View Auction" in response.text
+    assert "Market value" in response.text
+    assert "€25,000,000" in response.text
+
+
+def test_u23_auction_view_shows_market_value(tmp_path, monkeypatch):
+    latest = tmp_path / "latest.json"
+    latest.write_text(
+        """
+{
+  "checked_at": "2026-09-06T11:20:47+00:00",
+  "match_count": 1,
+  "matches": [
+    {
+      "checked_at": "2026-09-06T11:20:47+00:00",
+      "player_name": "Test U23",
+      "transfermarkt_team": "Club",
+      "position": "Forward",
+      "market_value_eur": 12000000,
+      "mws_name": "Test U23",
+      "event_name": "Event A - Event B",
+      "labels": "Worn",
+      "current_bid_eur": 50,
+      "current_bid_usd": 55,
+      "end_date_utc": "2026-09-14T16:00:00Z",
+      "slug": "test-u23",
+      "url": "https://mws.com/us/product/test-u23"
+    }
+  ]
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("mws_monitor.web.U23_OUTPUT_PATH", latest)
+
+    response = TestClient(app).get("/?view=u23_auctions")
+
+    assert response.status_code == 200
+    assert "Market value" in response.text
+    assert "€12,000,000" in response.text
 
 
 def test_romanian_auction_recheck_runs_checker_and_reports_progress(tmp_path, monkeypatch):
