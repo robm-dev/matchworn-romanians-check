@@ -1,6 +1,6 @@
 # Romanian MWS Auction Matches
 
-Checked at: 2026-10-01T14:40:21.822219+00:00
+Checked at: 2026-10-04T13:22:28.637263+00:00
 
 | Player | Market value | Item | Event | Bid EUR | Bid USD | Ends UTC |
 |---|---:|---|---|---:|---:|---|
